@@ -1,6 +1,13 @@
-# LWG architecture / Rung 1
+# LWG architecture / Rung 2
 
 **North star:** author a website like an image composition, with live links, authored motion, and inspectable, portable output. Design decisions should be recorded as data instead of re-invented from generic prompts.
+
+## Rung 2 implemented
+
+- Versioned schema v2: `project.scenes[]` with `id`, `title`, `bg`, `duration`, `transition`, and scene-specific `layers[]`. Existing v1 `layers[]` migration is deliberate and tested.
+- Storyboard editor: create/duplicate/delete/reorder scenes, retained global art style, independently authored per-scene layouts and entrance effects.
+- Deterministic motion sampler (`src/timeline.js`) shared by the scrubber and playback. Each layer includes `delay` and `duration` fields, sampled without an animation library. Playback advances to subsequent scenes.
+- Export: every scene becomes an anchorable full-height section with scene navigation, separate background, timing and viewport-activated entrance; standalone HTML, no remote dependencies.
 
 ## Implemented
 
@@ -14,16 +21,16 @@
 
 ## Deliberate boundaries
 
-- This is a **single-artboard** responsive prototype. Narrow screens reflow the artboard container, but do not yet have independent per-device compositions or authored mobile breakpoints.
+- This is a **multi-scene** editor, but each scene remains one artboard. Narrow screens reflow the artboard container, but do not yet have independent per-device compositions or authored mobile breakpoints.
 - An uploaded image becomes a data URI in the export, so very large media should be optimized externally for production.
 - Motion presets are deterministic CSS/DOM primitives, not a physics / Three.js / WebGL composition engine yet.
 - Extracting design tokens from a URL is distinct from copying a website. Do not copy protected logos, images, brand assets or identifiable layouts without permission. The extracted profile is a draft for **original** designs.
-- Vision-to-code, video-to-motion, screenshot diffs, Figma integration, and multi-page projects are future rungs, not completed features.
+- Vision-to-code, video-to-motion, screenshot diffs, Figma integration, and distinct routed web pages are future rungs, not completed features.
 - HTML export provides a reliable portable base, not a code generator for arbitrary React components.
 
 ## Next rungs
 
-1. **Rung 2:** multiple scenes, spatial anchors, container-breakpoint constraints, image crop/masks, snap guides, Undo/Redo and custom animation timelines.
+1. **Rung 2:** multiple scenes and motion timelines DONE. Remaining: spatial anchors, container-breakpoint constraints, masks, snap guides, undo/redo, authored custom keyframes.
 2. **Rung 3:** screenshot-based layout grammar plus user-approved semantic design tokens. Side-by-side reference capture and rendered image comparison, with explicit copyright boundaries.
 3. **Rung 4:** orchestrated timelines via optional GSAP/Lenis and Three.js scene widgets behind progressive enhancement; viewport gating, reduced motion, FPS budgets.
 4. **Rung 5:** user-provided agent bridge, visual edit protocol, page bundle, local model integration and optional export adapters for PhiOS/FieldAtlas/DomistikaXR.
