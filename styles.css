@@ -83,3 +83,23 @@
 .site-files .file-asset-thumb{width:25px;height:25px;border-radius:3px;object-fit:cover;background:#374256}
 @media(max-width:1450px){.editor-layout[data-mode=split]{display:block}.editor-layout[data-mode=split] .source-pane{margin-top:16px}.studio-modebar small{display:none}}
 @media(max-width:690px){.source-head,.live-head{align-items:flex-start;flex-direction:column}.preview-shell{padding:5px}.source-pane,.live-pane{padding:12px}.source-editor{min-height:350px}.studio-modebar>span{display:none}.studio-modebar button{flex:1;padding:9px 5px}}
+
+
+/* Rung 4.0: editable, browser-only Design DNA. No remote fonts or CSS dependencies. */
+.design-dna{margin-top:13px;padding:13px;border:1px solid #394151;border-radius:11px;background:#161c28}
+.dna-header{display:flex;align-items:baseline;justify-content:space-between;gap:6px}
+.dna-header strong{font-size:13px;color:#f2ede7}
+.dna-header small{font-size:10px;color:#a0a9bd}
+.dna-help{font-size:11px;line-height:1.55;color:#aab4c4;margin:9px 0 13px}
+.dna-colors{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.dna-colors label,.dna-type{display:flex;flex-direction:column;gap:5px;color:#b6c0ce;font-size:10px;font-weight:650}
+.dna-colors input[type=color]{appearance:none;width:100%;height:37px;padding:3px;background:#212a37;border:1px solid #515c6e;border-radius:7px;cursor:pointer}
+.dna-type{margin-top:12px}
+.dna-type select{width:100%;border:1px solid #515c6e;background:#202737;color:#f0eee9;padding:9px;border-radius:7px}
+.dna-contrast{display:block;margin:11px 0;font-size:10px;color:#a9dece;line-height:1.4}
+.dna-contrast.dna-warning{color:#f1b67f}
+.dna-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.dna-actions button{border:1px solid #4c5566;background:#222a39;color:#edeae8;border-radius:6px;padding:9px 4px;font-size:11px;font-weight:650}
+.dna-actions .dna-primary{background:#d49b6b;color:#17141b;border-color:#d49b6b}
+.profile-picker{max-height:325px;overflow-y:auto;padding-right:3px}
+@media(max-width:690px){.profile-picker{grid-template-columns:repeat(2,minmax(0,1fr));max-height:260px}.design-dna{margin-bottom:15px}}
