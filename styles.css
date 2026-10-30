@@ -103,3 +103,28 @@
 .dna-actions .dna-primary{background:#d49b6b;color:#17141b;border-color:#d49b6b}
 .profile-picker{max-height:325px;overflow-y:auto;padding-right:3px}
 @media(max-width:690px){.profile-picker{grid-template-columns:repeat(2,minmax(0,1fr));max-height:260px}.design-dna{margin-bottom:15px}}
+
+
+/* Rung 4.1: local-first, read-only Design Critic */
+.critic-panel{margin-top:26px;padding-top:2px;min-width:0}
+.critic-title{margin-top:10px}
+.critic-help,.critic-footnote{color:#9da7b9;font-size:10px;line-height:1.6;margin:5px 0 13px}
+.critic-tools{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.critic-tools button{border:1px solid #444e60;background:#222b39;color:#eceae9;border-radius:6px;padding:9px;font-size:11px;font-weight:650}
+.critic-tools button:hover{border-color:#f1b989}
+.critic-summary{font-size:12px;font-weight:750;color:#f0e6d8;padding:11px;border-radius:8px;border:1px solid #364254;background:#1a2330;line-height:1.5}
+.critic-filter-label{display:flex;align-items:center;justify-content:space-between;gap:9px;color:#a8b2c3;font-size:10px;font-weight:800;letter-spacing:.04em;margin:12px 0 9px}
+.critic-filter-label select{background:#212939;color:#ede9e7;border:1px solid #485264;border-radius:6px;padding:7px}
+.critic-list{display:flex;flex-direction:column;gap:7px;max-height:460px;overflow-y:auto}
+.critic-item{display:flex;flex-direction:column;align-items:flex-start;gap:5px;background:#1a2130;border:1px solid #384052;border-left:3px solid #728299;color:#e5e8ea;border-radius:7px;padding:10px;text-align:left;font-size:11px;line-height:1.5;width:100%;min-width:0;overflow-wrap:anywhere}
+button.critic-item:hover{background:#273141;border-color:#9facbf}
+button.critic-item:focus-visible{outline:2px solid #f1bc88;outline-offset:2px}
+.critic-item strong{font-size:10px;letter-spacing:.05em}
+.critic-item small{font-size:10px;color:#a3adbe}
+.critic-item em{font-style:normal;color:#adbfd1;font-size:10px}
+.critic-item.critic-error{border-left-color:#ed8f88}
+.critic-item.critic-warning{border-left-color:#e6ac75}
+.critic-item.critic-info{border-left-color:#83bdcf}
+.critic-empty,.critic-limit{font-size:11px;color:#b6bdcb;line-height:1.6;padding:11px;border:1px dashed #41495c;border-radius:7px;margin:0}
+.critic-footnote{margin-top:12px}
+@media(max-width:1040px){.right-panel .critic-panel{grid-column:1/-1}}
