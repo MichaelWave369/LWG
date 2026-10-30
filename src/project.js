@@ -1,4 +1,4 @@
-/** LWG project schema v2: scenes, per-layer motion tracks, v1 migration. */
+/** LWG project schema v2: scenes, per-layer motion tracks, optional custom CSS, v1 migration. */
 export const PROFILES = Object.freeze({
   nocturne: { name: 'After Dark', bg: '#09101c', ink: '#f0f1eb', accent: '#edaf72', secondary: '#b1bce7', font: 'system-ui' },
   solstice: { name: 'Soft Matter', bg: '#eee9dd', ink: '#18261f', accent: '#aa4e35', secondary: '#829d75', font: 'Georgia' },
@@ -61,7 +61,7 @@ export function sanitizeProject(raw={}) {
   const scenes=inputScenes.map(s=>sanitizeScene(s,bg));
   const ids=new Set();for(const s of scenes){if(ids.has(s.id))s.id=newId('scene');ids.add(s.id);}
   const activeSceneId=scenes.some(s=>s.id===raw.activeSceneId)?raw.activeSceneId:scenes[0].id;
-  return {version:2,title:text(raw.title,'Untitled Living Page',100),profile,activeSceneId,scenes};
+  return {version:2,title:text(raw.title,'Untitled Living Page',100),profile,activeSceneId,scenes,customCss:typeof raw.customCss==='string'&&raw.customCss.length<=32000&&!/<|>|@import\b|@font-face\b|@namespace\b|@charset\b|url\s*\(|image-set\s*\(|cross-fade\s*\(|https?:\/\/|data\s*:|src\s*:|\\|expression\s*\(|-moz-binding\b|behavior\s*:|[\u0000-\u0008\u000b\u000e-\u001f]/i.test(raw.customCss)?raw.customCss:''};
 }
 const layer=(kind,label,x,y,w,h,opts={})=>sanitizeLayer({id:newId('layer'),kind,label,x,y,w,h,...opts});
 export function createLayer(kind,profile='nocturne') {

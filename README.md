@@ -13,6 +13,19 @@ python3 -m http.server 8080
 
 On GitHub Pages, the same repository root can be deployed with **Settings → Pages → Deploy from a branch → main / root** after merging this PR. The GitHub Pages URL would then be `https://michaelwave369.github.io/LWG/`.
 
+## Rung 3: Dreamweaver-inspired Visual / Code / Live studio
+
+- **Design**: the existing drag-and-drop scene canvas, motion timeline, layer inspector, storyboard and art-direction profiles.
+- **Split**: visual canvas and editable source side-by-side (stacked when the window is narrow).
+- **Code**: edit `styles/custom.css` and the canonical `lwg-project.json`, with Apply/Revert and validation. A change to a JSON layer is reflected on the canvas; changes from Design refresh JSON after source is applied.
+- **Generated HTML**: inspect `index.html` as read-only source representing the *actual* exported page. HTML is **not** yet arbitrary two-way visual editing.
+- **Live**: a sandboxed iframe renders the exported standalone HTML. Preview desktop/tablet/mobile widths; external navigation inside this sandbox is intentionally blocked.
+- **Site files sidebar**: open source files, navigate scenes, jump to placed image layers. Images remain project/data-URI assets, not a browser-accessible disk folder.
+- **Browsallax companion**: a launcher opens the separate Browsallax Web app. LWG does not claim to gain arbitrary remote-page DOM access or bypass browser origin permissions. See [integration strategy](docs/BROWSALLAX_STUDIO_BRIDGE.md).
+- Project v2 schema stays compatible: optional `customCss` string is sanitized on import and included in standalone export; existing v1/v2 projects migrate as before. The CSS editor rejects remote imports, `url()`, and HTML breakouts to protect offline, portable output.
+
+**Source of truth:** editable JSON + custom CSS + visual properties. Generated HTML is an output artifact, not a second competing source of truth. That avoids silently throwing away manually authored HTML that the scene model cannot represent yet.
+
 ## Rung 1 features
 
 - Drag shapes, copy, text, and clickable link objects directly across a visual canvas.
@@ -56,7 +69,7 @@ This outputs `tokens.json` (DTCG 2025.10 typed tokens) and `style-profile.md` (a
 
 ## Original research kit
 
-The starting concept came from Kimi's supplied living website report and `web-engine.zip`, including an editorial brutalism profile, an aurora profile, an extractor and GSAP/Lenis demo. We kept the two profile briefs and **normalized their token files** under [`profiles/`](profiles/) instead of shipping their malformed dimension/easing values unchanged. The rewritten extractor is under [`tools/`](tools/). Motion in this Rung 2 studio is dependency-free; the optional heavy motion stack comes later.
+The starting concept came from Kimi's supplied living website report and `web-engine.zip`, including an editorial brutalism profile, an aurora profile, an extractor and GSAP/Lenis demo. We kept the two profile briefs and **normalized their token files** under [`profiles/`](profiles/) instead of shipping their malformed dimension/easing values unchanged. The rewritten extractor is under [`tools/`](tools/). Motion in this studio is dependency-free; the optional heavy motion stack comes later.
 
 See [Architecture / roadmap](docs/ARCHITECTURE.md). Licensed MIT.
 
