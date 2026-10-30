@@ -1,0 +1,28 @@
+name: LWG CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: |
+          node --check src/app.js
+          node --check src/project.js
+          node --check src/export.js
+          node --check src/dtcg.js
+          node --check tools/extract-tokens.js
+      - name: Unit tests
+        run: npm test
