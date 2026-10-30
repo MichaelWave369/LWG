@@ -105,6 +105,25 @@
       <div id="layer-list" class="layer-list" aria-label="Layers from back to front"></div>
       <div class="section-title inspector-title"><span>Object inspector</span><span>EDIT</span></div>
       <div id="inspector"><p class="empty-note">Select an object on the canvas to edit its content, geometry, and motion.</p></div>
+      <section class="critic-panel" aria-label="ΦDesign Critic">
+        <div class="section-title critic-title"><span>ΦDesign Critic</span><span>OFFLINE AUDIT</span></div>
+        <p class="critic-help">Static, read-only checks. Findings are suggestions, not WCAG certification or live pixel measurements.</p>
+        <div class="critic-tools">
+          <button id="critic-refresh" type="button">↻ Scan design</button>
+          <button id="critic-export" type="button">↓ JSON report</button>
+        </div>
+        <div id="critic-summary" class="critic-summary" role="status" aria-live="polite">Not scanned yet</div>
+        <label class="critic-filter-label" for="critic-filter">SHOW FINDINGS
+          <select id="critic-filter">
+            <option value="all">All</option>
+            <option value="error">Errors</option>
+            <option value="warning">Warnings</option>
+            <option value="info">Notes</option>
+          </select>
+        </label>
+        <div id="critic-list" class="critic-list" aria-label="Design audit findings"></div>
+        <p class="critic-footnote">Layer findings jump to their scene. Check exported pages with a browser and assistive technology before publishing.</p>
+      </section>
       <p class="editor-note">Images can be uploaded from your computer or linked by URL. Work saves locally in this browser and exports without any service dependency.</p>
     </aside>
   </div>
