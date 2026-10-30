@@ -3,6 +3,7 @@ import {esc,exportHtml,layerStyle} from './export.js';
 import {sampleLayer,formatTime,trackRect} from './timeline.js';
 import {readSource,parseProjectJson,validateCustomCss} from './source.js';
 import {FONT_STACKS,applyDesign,sanitizeDesign,contrastRatio} from './design/tokens.js';
+import {auditProject} from './design/critic.js';
 
 const $=id=>document.getElementById(id);
 const STORAGE='lwg-project-v2',LEGACY='lwg-project-v1';
@@ -17,7 +18,7 @@ const scene=()=>currentScene(project);
 const selected=()=>scene().layers.find(l=>l.id===selectedId);
 const glyph={text:'T',image:'▧',shape:'◯',link:'↗'};
 function toast(message){const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3200);}
-function persist(preserveDesignUndo=false){if(!preserveDesignUndo)designUndo=null;modified=true;try{localStorage.setItem(STORAGE,JSON.stringify(project));}catch{toast('Browser storage full. Save project JSON to preserve your work.');}}
+function persist(preserveDesignUndo=false){if(!preserveDesignUndo)designUndo=null;modified=true;try{localStorage.setItem(STORAGE,JSON.stringify(project));}catch{toast('Browser storage full. Save project JSON to preserve your work.');}renderCritic();}
 function stopPlay(){playing=false;cancelAnimationFrame(rafId);rafId=0;lastFrame=0;updatePlayButton();}
 function updatePlayButton(){
  $('timeline-play').textContent=playing?'Ⅱ Pause':'▶ Play scenes';$('timeline-play').setAttribute('aria-pressed',String(playing));
@@ -143,12 +144,41 @@ function renderDesign(){
  $('design-preview').disabled=!designDirty;
  $('design-undo').disabled=!designUndo;
 }
+function renderCritic(){
+ const report=auditProject(project),filter=$('critic-filter').value;
+ const summary=$('critic-summary');
+ summary.textContent=`${report.counts.error} errors · ${report.counts.warning} warnings · ${report.counts.info} notes`;
+ const list=$('critic-list');list.replaceChildren();
+ const visible=report.findings.filter(f=>filter==='all'||f.severity===filter);
+ for(const finding of visible.slice(0,60)){
+  const tag=document.createElement(finding.layerId?'button':'div');
+  if(finding.layerId){tag.type='button';tag.dataset.criticScene=finding.sceneId;tag.dataset.criticLayer=finding.layerId;}
+  tag.className='critic-item critic-'+finding.severity;
+  const heading=document.createElement('strong');
+  heading.textContent=`${finding.severity.toUpperCase()} · ${finding.rule.replaceAll('-',' ')}`;
+  const location=document.createElement('small');
+  location.textContent=[finding.sceneTitle,finding.layerLabel].filter(Boolean).join(' / ');
+  const message=document.createElement('span');message.textContent=finding.message;
+  const fix=document.createElement('em');fix.textContent=finding.recommendation;
+  tag.append(heading,location,message,fix);list.append(tag);
+ }
+ if(visible.length>60){
+  const extra=document.createElement('p');extra.className='critic-limit';
+  extra.textContent=`Showing 60 of ${visible.length} findings. Export JSON for the complete report.`;
+  list.append(extra);
+ }
+ if(!visible.length){
+  const empty=document.createElement('p');empty.className='critic-empty';
+  empty.textContent=report.findings.length?'No findings in this filter.':'No static issues found. Still verify the rendered website.';
+  list.append(empty);
+ }
+}
 function render(){
  $('project-title').value=project.title;
  renderDesign();
  document.querySelectorAll('[data-profile]').forEach(b=>{const active=b.dataset.profile===project.profile;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});
  $('preview-toggle').setAttribute('aria-pressed',String(isPreview));$('preview-toggle').textContent=isPreview?'■ Stop timeline preview':'▶ Timeline preview';
- renderScenes();renderArtboard();renderLayers();renderInspector();renderTimeline();updatePlayButton();renderSiteFiles();refreshStudio();
+ renderScenes();renderArtboard();renderLayers();renderInspector();renderTimeline();updatePlayButton();renderSiteFiles();refreshStudio();renderCritic();
 }
 function select(id){if(!scene().layers.some(l=>l.id===id))return;selectedId=id;renderArtboard();renderLayers();renderInspector();renderTimeline();}
 function setScene(id,save=true){const next=project.scenes.find(s=>s.id===id);if(!next)return;stopPlay();project.activeSceneId=id;selectedId=next.layers.at(-1)?.id||null;playhead=0;if(save)persist();render();}
@@ -182,6 +212,18 @@ $('design-undo').addEventListener('click',()=>{
  if(!designUndo)return;
  project=designUndo;designUndo=null;designDraft={...project.design};designDirty=false;
  persist();render();toast('Previous palette restored.');
+});
+$('critic-refresh').addEventListener('click',()=>{renderCritic();toast('Design Critic scanned the current project.');});
+$('critic-filter').addEventListener('change',renderCritic);
+$('critic-list').addEventListener('click',e=>{
+ const button=e.target.closest('button[data-critic-layer]');if(!button)return;
+ if(!project.scenes.some(s=>s.id===button.dataset.criticScene&&s.layers.some(l=>l.id===button.dataset.criticLayer)))return;
+ setScene(button.dataset.criticScene,false);select(button.dataset.criticLayer);
+ $('inspector').scrollIntoView({behavior:'smooth',block:'nearest'});
+});
+$('critic-export').addEventListener('click',()=>{
+ download(JSON.stringify(auditProject(project),null,2),'lwg-design-critic.json','application/json');
+ toast('Audit report exported as JSON.');
 });
 $('project-title').addEventListener('input',e=>{project.title=e.target.value.slice(0,100);persist();});
 $('profile-picker').addEventListener('click',e=>{const b=e.target.closest('[data-profile]');if(!b||b.dataset.profile===project.profile)return;

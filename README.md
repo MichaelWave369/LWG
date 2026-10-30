@@ -13,6 +13,16 @@ python3 -m http.server 8080
 
 On GitHub Pages, the same repository root can be deployed with **Settings → Pages → Deploy from a branch → main / root** after merging this PR. The GitHub Pages URL would then be `https://michaelwave369.github.io/LWG/`.
 
+## Rung 4.1: ΦDesign Critic (local static audits)
+
+- The **ΦDesign Critic** panel continuously scans the current project on saved edits, or on demand with **Scan design**.
+- Findings are ordered by severity and include the rule, affected scene/layer, explanation and suggested remediation.
+- Click a layer finding to jump to it in the editor; filter by Errors, Warnings or Notes.
+- Download the complete deterministic, versioned JSON report without a remote service.
+- Checks cover nonfunctional links and missing scene anchors, generic image alt text, remote image dependencies, clipping risks, tiny text/tap targets, continuous motion density and **estimated** text contrast against plain scene backgrounds.
+- Audits never modify projects, grant permissions or auto-apply fixes. Contrast is skipped when known image/shape layers underlie text.
+- **Limitations:** static analysis is not browser rendering, actual composited contrast, mobile accessibility testing, assistive-technology validation or a WCAG certificate.
+
 ## Rung 4.0: Design DNA foundation
 
 - Six original art-direction presets: After Dark, Soft Matter, Signal / 90, Ember Library, Tidal Glass and Modern Print.
