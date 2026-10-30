@@ -21,7 +21,7 @@ test('Design Critic produces a stable, non-mutating, versioned JSON audit',()=>{
 });
 test('contrasting text passes, low contrast gets localized evidence and navigation IDs',()=>{
  const p=blank(),s=p.scenes[0];
- s.layers.push({...createLayer('text'),id:'hero-text',color:'#555555',content:'Readable? Not enough',fontSize:15,weight:400});
+ s.layers.push({...createLayer('text'),id:'hero-text',color:'#999999',content:'Readable? Not enough',fontSize:15,weight:400});
  const report=auditProject(p);
  const issue=find(report,'estimated-contrast')[0];
  assert.equal(issue.sceneId,s.id);
@@ -82,7 +82,7 @@ test('overflow, small text, small tap targets and motion density yield advisorie
 test('severity ordering and note-only results are consistent',()=>{
  const p=blank(),s=p.scenes[0];
  s.layers.push({...createLayer('image'),id:'empty'});
- s.layers.push({...createLayer('link'),id:'bad',href:'#none',content:'click here'});
+ s.layers.push({...createLayer('link'),id:'bad',href:'#none',content:'click here',color:'#000000'});
  const report=auditProject(p);
  const sev=report.findings.map(f=>CRITIC_SEVERITIES.indexOf(f.severity));
  assert.deepEqual(sev,[...sev].sort((a,b)=>a-b));
