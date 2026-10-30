@@ -1,6 +1,7 @@
 import {PROFILES,MOTIONS,TRANSITIONS,MAX_SCENES,MAX_LAYERS,createProject,createScene,duplicateScene,currentScene,createLayer,sanitizeProject,sanitizeLayer,safeUrl} from './project.js';
 import {esc,exportHtml,layerStyle} from './export.js';
 import {sampleLayer,formatTime,trackRect} from './timeline.js';
+import {readSource,parseProjectJson,validateCustomCss} from './source.js';
 
 const $=id=>document.getElementById(id);
 const STORAGE='lwg-project-v2',LEGACY='lwg-project-v1';
@@ -9,6 +10,7 @@ try{project=sanitizeProject(JSON.parse(localStorage.getItem(STORAGE)||localStora
 catch{project=createProject();}
 let selectedId=currentScene(project).layers.at(-1)?.id||null;
 let isPreview=false,modified=false,toastTimer,playhead=0,playing=false,lastFrame=0,rafId=0;
+let workspaceMode='design',sourceKind='css',sourceDirty=false;
 const scene=()=>currentScene(project);
 const selected=()=>scene().layers.find(l=>l.id===selectedId);
 const glyph={text:'T',image:'▧',shape:'◯',link:'↗'};
@@ -27,10 +29,10 @@ function applyTime(){
  }
 }
 function renderArtboard(){
- const stage=$('artboard'),s=scene();stage.style.background=s.bg;stage.replaceChildren();stage.classList.toggle('preview-mode',isPreview);
+ const stage=$('artboard'),s=scene();stage.classList.add('scene');stage.style.background=s.bg;stage.replaceChildren();stage.classList.toggle('preview-mode',isPreview);
  for(const l of s.layers){
   const node=document.createElement(l.kind==='link'?'a':'div');
-  node.className='object'+(l.id===selectedId&&!isPreview?' selected':'');
+  node.className='object '+l.kind+(l.id===selectedId&&!isPreview?' selected':'');
   node.dataset.id=l.id;node.dataset.kind=l.kind;node.dataset.motion=l.motion;node.style.cssText=layerStyle(l);
   node.setAttribute('aria-label',l.label);
   if(l.kind==='shape')node.setAttribute('aria-hidden','true');
@@ -116,7 +118,7 @@ function render(){
  $('project-title').value=project.title;
  document.querySelectorAll('[data-profile]').forEach(b=>{const active=b.dataset.profile===project.profile;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});
  $('preview-toggle').setAttribute('aria-pressed',String(isPreview));$('preview-toggle').textContent=isPreview?'■ Stop timeline preview':'▶ Timeline preview';
- renderScenes();renderArtboard();renderLayers();renderInspector();renderTimeline();updatePlayButton();
+ renderScenes();renderArtboard();renderLayers();renderInspector();renderTimeline();updatePlayButton();renderSiteFiles();refreshStudio();
 }
 function select(id){if(!scene().layers.some(l=>l.id===id))return;selectedId=id;renderArtboard();renderLayers();renderInspector();renderTimeline();}
 function setScene(id,save=true){const next=project.scenes.find(s=>s.id===id);if(!next)return;stopPlay();project.activeSceneId=id;selectedId=next.layers.at(-1)?.id||null;playhead=0;if(save)persist();render();}
@@ -197,8 +199,88 @@ $('export-html').addEventListener('click',()=>{download(exportHtml(project),'lwg
 $('save-json').addEventListener('click',()=>{download(JSON.stringify(project,null,2),'lwg-project-v2.json','application/json');toast('Editable project saved.');});
 $('import-json').addEventListener('click',()=>$('json-input').click());
 $('json-input').addEventListener('change',async e=>{const file=e.target.files?.[0];e.target.value='';if(!file)return;if(file.size>4_000_000){toast('Project file exceeds the 4 MB import limit.');return;}
- try{const data=JSON.parse(await file.text());if(![1,2].includes(data.version)||!(Array.isArray(data.layers)||Array.isArray(data.scenes)))throw Error('Not an LWG v1/v2 project');stopPlay();project=sanitizeProject(data);selectedId=scene().layers.at(-1)?.id||null;isPreview=false;playhead=0;persist();modified=false;render();toast('Project imported. Legacy v1 files are migrated automatically.');}
+ try{const data=JSON.parse(await file.text());project=parseProjectJson(JSON.stringify(data));stopPlay();selectedId=scene().layers.at(-1)?.id||null;isPreview=false;playhead=0;persist();modified=false;render();toast('Project imported. Legacy v1 files are migrated automatically.');}
  catch(err){toast(`Import failed: ${err.message}`);}
 });
+/* Rung 3: Design / Split / Code / Live. Canonical JSON is truly bidirectional; generated HTML is read-only. */
+const sourceHelp={
+ css:'Edit styles/custom.css. CSS applies to both the artboard and published HTML. Remote imports, url() and HTML are blocked.',
+ json:'Edit the canonical LWG project source. Apply parses and validates the complete project, then re-renders the visual editor.',
+ html:'Generated index.html is a read-only preview of the actual export. Edit project JSON or CSS to change it.'
+};
+function renderSiteFiles(){
+ const list=$('site-files');list.replaceChildren();
+ const head=document.createElement('div');head.className='file-header';head.textContent='SITE ROOT · LOCAL';list.append(head);
+ const addFile=(label,meta,action,value,thumb)=>{
+  const b=document.createElement('button');b.type='button';b.dataset[action]=value;
+  if(thumb){const img=document.createElement('img');img.className='file-asset-thumb';img.src=thumb;img.alt='';b.append(img);}
+  b.append(document.createTextNode(label));const small=document.createElement('small');small.textContent=meta;b.append(small);list.append(b);
+ };
+ addFile('index.html','generated','fileCode','html');addFile('styles/custom.css','editable','fileCode','css');addFile('lwg-project.json','editable','fileCode','json');
+ for(let i=0;i<project.scenes.length;i++)addFile(`${String(i+1).padStart(2,'0')} · ${project.scenes[i].title}`,'scene','fileScene',project.scenes[i].id);
+ const assets=project.scenes.flatMap(s=>s.layers.filter(l=>l.kind==='image'&&l.src).map(l=>({scene:s.id,layer:l})));
+ if(assets.length){const a=document.createElement('div');a.className='file-header';a.textContent=`IMAGES · ${assets.length} PLACEMENTS`;list.append(a);
+  for(const {scene:sid,layer:l} of assets.slice(0,24))addFile(l.label,'image','fileAsset',`${sid}|${l.id}`,l.src);
+ }
+}
+function refreshSource(force=false){
+ const editor=$('source-editor');$('source-kind').value=sourceKind;editor.readOnly=sourceKind==='html';
+ $('source-apply').disabled=sourceKind==='html'||!sourceDirty;
+ $('source-revert').disabled=!sourceDirty;
+ $('source-help').textContent=sourceHelp[sourceKind];
+ if(!sourceDirty||force){editor.value=readSource(project,sourceKind);sourceDirty=false;}
+ $('source-status').textContent=sourceDirty?'Unsaved source changes':'Source in sync';
+}
+function refreshStudio(){
+ $('lwg-custom-style').textContent=project.customCss||'';
+ $('editor-layout').dataset.mode=workspaceMode;
+ $('design-surface').hidden=workspaceMode==='code'||workspaceMode==='live';
+ $('source-pane').hidden=workspaceMode==='design'||workspaceMode==='live';
+ $('live-pane').hidden=workspaceMode!=='live';
+ document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===workspaceMode)));
+ refreshSource();
+ if(workspaceMode==='live')$('live-frame').srcdoc=exportHtml(project);
+}
+function enterMode(mode){
+ if(!['design','split','code','live'].includes(mode))return;
+ if((mode==='split'||mode==='code')&&workspaceMode!==mode)refreshSource();
+ workspaceMode=mode;stopPlay();refreshStudio();
+}
+function setSourceKind(kind){
+ if(!['css','json','html'].includes(kind))return;
+ if(sourceDirty&&!confirm('Discard unapplied source changes?')){$('source-kind').value=sourceKind;return;}
+ sourceDirty=false;sourceKind=kind;refreshSource(true);
+}
+function applySourceDraft(){
+ if(!sourceDirty||sourceKind==='html')return;
+ try{
+  if(sourceKind==='css')project.customCss=validateCustomCss($('source-editor').value);
+  else if(sourceKind==='json'){
+   const next=parseProjectJson($('source-editor').value);stopPlay();project=next;
+   selectedId=scene().layers.at(-1)?.id||null;isPreview=false;playhead=0;
+  }
+  sourceDirty=false;persist();render();toast('Source applied. Canvas and export are in sync.');
+ }catch(err){$('source-status').textContent=err.message;toast(err.message);}
+}
+document.querySelector('.studio-modebar').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(b)enterMode(b.dataset.mode);});
+$('source-kind').addEventListener('change',e=>setSourceKind(e.target.value));
+$('source-editor').addEventListener('input',()=>{if(sourceKind==='html')return;sourceDirty=true;$('source-status').textContent='Unsaved source changes';$('source-apply').disabled=false;$('source-revert').disabled=false;});
+$('source-editor').addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){e.preventDefault();applySourceDraft();}});
+$('source-apply').addEventListener('click',applySourceDraft);
+$('source-revert').addEventListener('click',()=>{sourceDirty=false;refreshSource(true);});
+$('site-files').addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.fileCode){enterMode('code');setSourceKind(b.dataset.fileCode);return;}
+ if(b.dataset.fileScene){setScene(b.dataset.fileScene);enterMode('design');return;}
+ if(b.dataset.fileAsset){const [sid,lid]=b.dataset.fileAsset.split('|');setScene(sid);select(lid);enterMode('design');}
+});
+document.querySelector('.device-switch').addEventListener('click',e=>{
+ const b=e.target.closest('[data-device]');if(!b)return;
+ const device=b.dataset.device;if(!['mobile','tablet','desktop'].includes(device))return;
+ document.querySelector('.preview-shell').dataset.device=device;
+ document.querySelectorAll('[data-device]').forEach(n=>{if(n.tagName==='BUTTON')n.setAttribute('aria-pressed',String(n.dataset.device===device));});
+});
+window.addEventListener('beforeunload',e=>{if(sourceDirty){e.preventDefault();e.returnValue='';}});
+
 $('preview-page').addEventListener('click',()=>{const blob=new Blob([exportHtml(project)],{type:'text/html'}),url=URL.createObjectURL(blob);const win=window.open(url,'_blank','noopener,noreferrer');if(!win)toast('Allow pop-ups to open the page preview.');setTimeout(()=>URL.revokeObjectURL(url),60000);});
 render();

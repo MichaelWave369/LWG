@@ -4,15 +4,16 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#10121a" />
-  <meta name="description" content="LWG: a local-first canvas for visual, animated websites." />
+  <meta name="description" content="LWG: a local-first Dreamweaver-style design, code, split and live website studio." />
   <title>LWG / Living Website Generator</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="./" aria-label="LWG home"><span class="brand-orb">◉</span><span>LWG<span class="brand-caption">THE LIVING WEB</span></span></a>
-    <div class="center-label"><span class="status-dot"></span> VISUAL COMPOSITION ENGINE <span class="version">/ 0.2.0</span></div>
+    <div class="center-label"><span class="status-dot"></span> VISUAL COMPOSITION ENGINE <span class="version">/ 0.3.0</span></div>
     <div class="top-actions">
+      <a class="utility browsallax-link" href="https://michaelwave369.github.io/Browsallax/" target="_blank" rel="noopener noreferrer" title="Launch Browsallax web companion">Browsallax ↗</a>
       <button class="utility" id="import-json" type="button" title="Import a project JSON">Import</button>
       <button class="utility" id="save-json" type="button" title="Download editable project JSON">Save project</button>
       <button class="primary" id="export-html" type="button">Export website <span aria-hidden="true">↗</span></button>
@@ -38,9 +39,21 @@
         <button class="tool-btn" data-add="shape" type="button"><span aria-hidden="true">◯</span>Shape</button>
         <button class="tool-btn" data-add="link" type="button"><span aria-hidden="true">↗</span>Link</button>
       </div>
+      <div class="section-title"><span>Site files</span><span>PROJECT</span></div>
+      <div id="site-files" class="site-files" aria-label="Project files and image assets"></div>
       <div class="aside-footer"><span class="small-star">✳</span> LOCAL FIRST / NO ACCOUNT / YOUR FILES</div>
     </aside>
     <main class="editor">
+      <div class="studio-modebar" role="group" aria-label="Studio workspace mode">
+        <span>WORKSPACE</span>
+        <button type="button" data-mode="design" aria-pressed="true">▤ Design</button>
+        <button type="button" data-mode="split" aria-pressed="false">◫ Split</button>
+        <button type="button" data-mode="code" aria-pressed="false">⌘ Code</button>
+        <button type="button" data-mode="live" aria-pressed="false">▶ Live</button>
+        <small>Visual editing + real source + isolated preview</small>
+      </div>
+      <div id="editor-layout" class="editor-layout" data-mode="design">
+      <div id="design-surface" class="design-surface">
       <div class="editor-head"><div><span class="eyebrow">LIVE CANVAS / 1440 × 900</span><h2>Make it feel alive<span class="punctuation">.</span></h2></div><div class="preview-actions"><button class="small-btn" id="reset-template" type="button" title="Reset current style to its example composition">Reset scene</button><button class="small-btn" id="preview-toggle" type="button" aria-pressed="false">▶ Preview motion</button></div></div>
       <div class="canvas-container">
         <section class="scene-studio" aria-label="Scene storyboard">
@@ -59,6 +72,19 @@
         <div class="timeline-viewport" id="timeline-viewport"><div id="timeline-tracks" class="timeline-tracks"></div><div id="timeline-playhead" class="timeline-playhead" aria-hidden="true"></div></div>
       </section>
       <div class="editor-under"><div><span class="eyebrow">HOW IT WORKS</span><p>Each scene has its own layers, background, timing and entrance. <strong>Export website</strong> creates one portable multi-scene HTML file.</p></div><button class="text-link" id="preview-page" type="button">Open real page preview ↗</button></div>
+      </div>
+      <section id="source-pane" class="source-pane" aria-label="Source code editor" hidden>
+        <div class="source-head"><div><span class="eyebrow">SOURCE / EDITABLE</span><h2>Work in the code.</h2></div><label for="source-kind">FILE<select id="source-kind"><option value="css">styles/custom.css</option><option value="json">lwg-project.json</option><option value="html">index.html (generated)</option></select></label></div>
+        <p id="source-help" class="source-help">Custom CSS is applied to the visual canvas and exported website. No remote imports or URL fetches.</p>
+        <textarea id="source-editor" class="source-editor" spellcheck="false" aria-label="Source code"></textarea>
+        <div class="source-actions"><span id="source-status" role="status">Ready</span><button id="source-revert" type="button">Revert draft</button><button id="source-apply" class="source-apply" type="button">Apply to studio</button></div>
+      </section>
+      <section id="live-pane" class="live-pane" aria-label="Isolated website preview" hidden>
+        <div class="live-head"><div><span class="eyebrow">ACTUAL EXPORTED HTML / SANDBOXED</span><h2>See the real page.</h2></div><div class="device-switch" role="group" aria-label="Preview viewport"><button type="button" data-device="desktop" aria-pressed="true">Desktop</button><button type="button" data-device="tablet" aria-pressed="false">Tablet</button><button type="button" data-device="mobile" aria-pressed="false">Mobile</button></div></div>
+        <div class="preview-shell" data-device="desktop"><iframe id="live-frame" title="Rendered living website" sandbox="allow-scripts" loading="lazy" referrerpolicy="no-referrer"></iframe></div>
+        <p class="preview-note">This isolated frame runs the exported HTML. External links are restricted inside the sandbox. Use “Open real page preview” below the canvas to test a new browser tab.</p>
+      </section>
+      </div>
     </main>
     <aside class="right-panel" aria-label="Layers and selected object properties">
       <div class="panel-kicker">02 / COMPOSITION</div>
@@ -71,6 +97,7 @@
   </div>
   <input type="file" id="json-input" accept="application/json,.json" hidden />
   <input type="file" id="image-input" accept="image/png,image/jpeg,image/webp,image/gif" hidden />
+  <style id="lwg-custom-style"></style>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script type="module" src="src/app.js"></script>
 </body>

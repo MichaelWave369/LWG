@@ -1,6 +1,15 @@
-# LWG architecture / Rung 2
+# LWG architecture / Rung 3
 
 **North star:** author a website like an image composition, with live links, authored motion, and inspectable, portable output. Design decisions should be recorded as data instead of re-invented from generic prompts.
+
+## Rung 3 implemented: synchronized studio
+
+- Workspace modes: Design, Split, Code and Live. The same canonical LWG v2 scene data powers all of them.
+- Editable canonical JSON and custom CSS: `src/source.js` validates edits; `src/project.js` preserves optional `customCss`; `src/export.js` embeds that CSS into the same output shown in Live preview.
+- Generated HTML is deliberately read-only in the Code panel. Arbitrary HTML-to-scene parsing is not implemented. Export output remains portable without a service.
+- Live preview uses an opaque-origin sandboxed iframe (`allow-scripts` only), with desktop/tablet/mobile width controls. In-frame outgoing navigation is intentionally restricted.
+- Local-first site-files explorer lists scenes, generated source, and existing image placements; no disk or cross-origin read permissions.
+- Browsallax is a separate browser/research/operator app; use the launcher to open it, not to silently grant its operator new authority.
 
 ## Rung 2 implemented
 
@@ -30,10 +39,10 @@
 
 ## Next rungs
 
-1. **Rung 2:** multiple scenes and motion timelines DONE. Remaining: spatial anchors, container-breakpoint constraints, masks, snap guides, undo/redo, authored custom keyframes.
-2. **Rung 3:** screenshot-based layout grammar plus user-approved semantic design tokens. Side-by-side reference capture and rendered image comparison, with explicit copyright boundaries.
-3. **Rung 4:** orchestrated timelines via optional GSAP/Lenis and Three.js scene widgets behind progressive enhancement; viewport gating, reduced motion, FPS budgets.
-4. **Rung 5:** user-provided agent bridge, visual edit protocol, page bundle, local model integration and optional export adapters for PhiOS/FieldAtlas/DomistikaXR.
+1. **Rung 3:** Dreamweaver-style workspace DONE. Remaining: syntax highlighting, CSS diagnostics, per-element safe HTML fragments and full undo/redo.
+2. **Rung 4:** screenshot-based layout grammar and section-by-section visual comparison; image masks, responsive breakpoints, snap guides and asset library.
+3. **Rung 5:** optional GSAP/Lenis / Three.js scene widgets with performance budgets and reduced-motion alternatives.
+4. **Rung 6:** governed Browsallax inspection/export adapter, user-granted reference capture, visual critique receipts, and optional PhiOS/FieldAtlas/DomistikaXR exchange.
 
 ## Security and accessibility
 

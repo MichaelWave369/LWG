@@ -36,5 +36,6 @@ export function exportHtml(raw){
   const project=sanitizeProject(raw),p=PROFILES[project.profile];
   const scenes=project.scenes.map((scene,i)=>`<section class="scene-shell" id="${scene.id}" data-transition="${scene.transition}" style="--scene-bg:${scene.bg}" aria-label="${esc(scene.title)}"><div class="scene">${scene.layers.map(layerHtml).join('\n')}</div></section>`).join('\n');
   const nav=project.scenes.length>1?`<nav class="scene-nav" aria-label="Scene navigation">${project.scenes.map((s,i)=>`<a href="#${s.id}" aria-label="Go to ${esc(s.title)}" title="${esc(s.title)}">${i+1}</a>`).join('')}</nav>`:'';
-  return `<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="${p.bg}"><title>${esc(project.title)}</title>\n<style>:root{--bg:${p.bg};--ink:${p.ink};--accent:${p.accent}}${css}</style></head>\n<body><main class="page">${scenes}</main>${nav}\n<script>${script}</script></body></html>`;
+  return `<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="${p.bg}"><title>${esc(project.title)}</title>\n<style>:root{--bg:${p.bg};--ink:${p.ink};--accent:${p.accent}}${css}
+${project.customCss}</style></head>\n<body><main class="page">${scenes}</main>${nav}\n<script>${script}</script></body></html>`;
 }
