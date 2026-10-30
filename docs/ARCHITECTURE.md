@@ -1,6 +1,15 @@
-# LWG architecture / Rung 3
+# LWG architecture / Rung 4.0
 
 **North star:** author a website like an image composition, with live links, authored motion, and inspectable, portable output. Design decisions should be recorded as data instead of re-invented from generic prompts.
+
+## Rung 4.0 implemented: Design DNA foundation
+
+- `src/design/tokens.js` owns six original profiles, a safe local-font allowlist, color sanitization, recoloring of token-matching layers, CSS token serialization and text/background contrast calculations.
+- Project JSON remains version 2 with an optional sanitized `design` object; legacy projects derive default values from their profile.
+- Editor Design DNA offers preview without mutation, apply, and single-step undo. Custom-layer overrides are preserved.
+- `src/export.js` and the editor artboard use the same canonical typography and color values.
+- The present contrast indicator is a narrow text/background advisory, not an automated accessibility certificate.
+- Preview opens the normal Live sandbox with a temporary candidate render; a subsequent navigation or edit returns to the saved project.
 
 ## Rung 3 implemented: synchronized studio
 
@@ -40,7 +49,7 @@
 ## Next rungs
 
 1. **Rung 3:** Dreamweaver-style workspace DONE. Remaining: syntax highlighting, CSS diagnostics, per-element safe HTML fragments and full undo/redo.
-2. **Rung 4:** screenshot-based layout grammar and section-by-section visual comparison; image masks, responsive breakpoints, snap guides and asset library.
+2. **Rung 4.0:** Design DNA foundation DONE. **Next Rung 4.1:** deterministic design quality checks; screenshot-based layout grammar and section-by-section visual comparison; image masks, responsive breakpoints, snap guides and asset library.
 3. **Rung 5:** optional GSAP/Lenis / Three.js scene widgets with performance budgets and reduced-motion alternatives.
 4. **Rung 6:** governed Browsallax inspection/export adapter, user-granted reference capture, visual critique receipts, and optional PhiOS/FieldAtlas/DomistikaXR exchange.
 
