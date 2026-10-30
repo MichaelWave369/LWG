@@ -2,6 +2,14 @@
 
 **North star:** author a website like an image composition, with live links, authored motion, and inspectable, portable output. Design decisions should be recorded as data instead of re-invented from generic prompts.
 
+## Rung 4.1 implemented: ΦDesign Critic
+
+- `src/design/critic.js` implements an offline, read-only, deterministic audit producing `LWG_DESIGN_CRITIC_V1` findings with stable rule + scene + layer identifiers and action-oriented advice.
+- The right-hand Critic panel updates on project persistence, supports manual re-scan, severity filters, clickable scene/layer navigation, and JSON report export.
+- Findings cover missing or broken links, misleading link labels, generic image alt, offline dependency for remote assets, off-artboard geometry, tiny type/tap areas, many continuous motions, and an estimated scene-background contrast test.
+- Static estimates deliberately skip contrast checks when earlier image/shape layers intersect text, and cannot certify rendered contrast, device breakpoints, real target sizing, accessibility-tree correctness or WCAG conformance.
+- No silent modifications, external requests, model dependencies, tracking or new execution rights.
+
 ## Rung 4.0 implemented: Design DNA foundation
 
 - `src/design/tokens.js` owns six original profiles, a safe local-font allowlist, color sanitization, recoloring of token-matching layers, CSS token serialization and text/background contrast calculations.
