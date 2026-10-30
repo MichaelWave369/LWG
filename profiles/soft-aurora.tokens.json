@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.designtokens.org/schemas/2025.10/format.json",
+  "$description": "Normalized from the supplied soft-aurora reference profile; layout instructions are in soft-aurora.md",
+  "color": {
+    "bg": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.956863,
+          0.94902,
+          0.933333
+        ],
+        "hex": "#f4f2ee"
+      }
+    },
+    "surface": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "hex": "#ffffff"
+      }
+    },
+    "text": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.101961,
+          0.101961,
+          0.109804
+        ],
+        "hex": "#1a1a1c"
+      }
+    },
+    "muted": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.431373,
+          0.431373,
+          0.462745
+        ],
+        "hex": "#6e6e76"
+      }
+    },
+    "accent": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.356863,
+          0.356863,
+          0.968627
+        ],
+        "hex": "#5b5bf7"
+      }
+    }
+  },
+  "font": {
+    "display": {
+      "$value": "Fraunces, Georgia, serif",
+      "$type": "fontFamily"
+    },
+    "body": {
+      "$value": "Inter, sans-serif",
+      "$type": "fontFamily"
+    }
+  },
+  "motion": {
+    "easing": {
+      "$type": "cubicBezier",
+      "$value": [
+        0.16,
+        1,
+        0.3,
+        1
+      ]
+    },
+    "reveal": {
+      "$type": "duration",
+      "$value": {
+        "value": 1000,
+        "unit": "ms"
+      }
+    },
+    "stagger": {
+      "$type": "duration",
+      "$value": {
+        "value": 120,
+        "unit": "ms"
+      }
+    }
+  }
+}

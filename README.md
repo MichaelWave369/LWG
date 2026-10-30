@@ -1,3 +1,50 @@
-# LWG — Living Website Generator
+# LWG · Living Website Generator
 
-A local-first visual composition engine for living websites. Initial scaffold; implementation is being developed on a feature branch.
+**Websites should feel like places, not cloned templates.** LWG is a local-first visual studio for composing animated, image-rich websites as layered scenes.
+
+## Open the studio
+
+LWG runs as static files with no npm install needed:
+
+```bash
+python3 -m http.server 8080
+# Open http://localhost:8080
+```
+
+On GitHub Pages, the same repository root can be deployed with **Settings → Pages → Deploy from a branch → main / root** after merging this PR. The GitHub Pages URL would then be `https://michaelwave369.github.io/LWG/`.
+
+## Rung 1 features
+
+- Drag shapes, copy, text, and clickable link objects directly across a visual canvas.
+- Add your own images by URL or by upload; image uploads can be embedded in exported HTML.
+- Tune position, size, rotation, opacity, typography, timing and 9 movement behaviors.
+- Switch between three starting visual art directions: **After Dark**, **Soft Matter**, **Signal / 90**.
+- Inspect and reorder layers, duplicate/remove objects, preview motion, nudge with arrow keys.
+- Local autosave; import/export editable JSON; download a **standalone HTML/CSS/JS website**.
+- The editor and exported page have **no backend and no CDN dependencies**.
+
+## Tests
+
+```bash
+npm test
+```
+
+Browser tests require an available Chromium binary; the repository's unit tests do not need third-party modules.
+
+## Website reference design language extractor
+
+```bash
+npm install
+npx playwright install chromium
+node tools/extract-tokens.js https://example.com --out profiles/my-reference
+```
+
+This outputs `tokens.json` (DTCG 2025.10 typed tokens) and `style-profile.md` (an editable draft). Extraction samples computed CSS; it does not copy content, images or code. Respect site terms and permissions. A sampled token palette is a starting point, not automatically a complete, unique brand or visual identity.
+
+## Original research kit
+
+The starting concept came from Kimi's supplied living website report and `web-engine.zip`, including an editorial brutalism profile, an aurora profile, an extractor and GSAP/Lenis demo. We kept the two profile briefs and **normalized their token files** under [`profiles/`](profiles/) instead of shipping their malformed dimension/easing values unchanged. The rewritten extractor is under [`tools/`](tools/). Motion in this Rung 1 studio is dependency-free; the optional heavy motion stack comes later.
+
+See [Architecture / roadmap](docs/ARCHITECTURE.md). Licensed MIT.
+
+Part of the **Enter the Field / Φ369 Labs** open ecosystem.

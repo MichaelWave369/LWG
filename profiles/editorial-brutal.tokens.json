@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.designtokens.org/schemas/2025.10/format.json",
+  "$description": "Normalized from the supplied editorial-brutal reference profile; layout instructions are in editorial-brutal.md",
+  "color": {
+    "bg": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.039216,
+          0.039216,
+          0.043137
+        ],
+        "hex": "#0a0a0b"
+      }
+    },
+    "surface": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.07451,
+          0.07451,
+          0.086275
+        ],
+        "hex": "#131316"
+      }
+    },
+    "text": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.94902,
+          0.941176,
+          0.917647
+        ],
+        "hex": "#f2f0ea"
+      }
+    },
+    "muted": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.541176,
+          0.541176,
+          0.576471
+        ],
+        "hex": "#8a8a93"
+      }
+    },
+    "accent": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.784314,
+          1.0,
+          0.239216
+        ],
+        "hex": "#c8ff3d"
+      }
+    }
+  },
+  "font": {
+    "display": {
+      "$value": "Neue Montreal, Inter, sans-serif",
+      "$type": "fontFamily"
+    },
+    "body": {
+      "$value": "Inter, sans-serif",
+      "$type": "fontFamily"
+    }
+  },
+  "motion": {
+    "easing": {
+      "$type": "cubicBezier",
+      "$value": [
+        0.16,
+        1,
+        0.3,
+        1
+      ]
+    },
+    "reveal": {
+      "$type": "duration",
+      "$value": {
+        "value": 800,
+        "unit": "ms"
+      }
+    },
+    "stagger": {
+      "$type": "duration",
+      "$value": {
+        "value": 80,
+        "unit": "ms"
+      }
+    }
+  }
+}
