@@ -1,9 +1,5 @@
-/** LWG project schema v2: scenes, per-layer motion tracks, optional custom CSS, v1 migration. */
-export const PROFILES = Object.freeze({
-  nocturne: { name: 'After Dark', bg: '#09101c', ink: '#f0f1eb', accent: '#edaf72', secondary: '#b1bce7', font: 'system-ui' },
-  solstice: { name: 'Soft Matter', bg: '#eee9dd', ink: '#18261f', accent: '#aa4e35', secondary: '#829d75', font: 'Georgia' },
-  signal: { name: 'Signal / 90', bg: '#101014', ink: '#f9e8d2', accent: '#f66a5b', secondary: '#a1f5be', font: 'monospace' }
-});
+import {DESIGN_PROFILES,sanitizeDesign} from './design/tokens.js';
+export const PROFILES = DESIGN_PROFILES;
 export const MOTIONS = ['none','float','drift','pulse','spin','reveal','hover-lift','magnetic','marquee'];
 export const TRANSITIONS = ['none','fade','rise','zoom'];
 export const KINDS = ['text','image','shape','link'];
@@ -61,18 +57,18 @@ export function sanitizeProject(raw={}) {
   const scenes=inputScenes.map(s=>sanitizeScene(s,bg));
   const ids=new Set();for(const s of scenes){if(ids.has(s.id))s.id=newId('scene');ids.add(s.id);}
   const activeSceneId=scenes.some(s=>s.id===raw.activeSceneId)?raw.activeSceneId:scenes[0].id;
-  return {version:2,title:text(raw.title,'Untitled Living Page',100),profile,activeSceneId,scenes,customCss:typeof raw.customCss==='string'&&raw.customCss.length<=32000&&!/<|>|@import\b|@font-face\b|@namespace\b|@charset\b|url\s*\(|image-set\s*\(|cross-fade\s*\(|https?:\/\/|data\s*:|src\s*:|\\|expression\s*\(|-moz-binding\b|behavior\s*:|[\u0000-\u0008\u000b\u000e-\u001f]/i.test(raw.customCss)?raw.customCss:''};
+  return {version:2,title:text(raw.title,'Untitled Living Page',100),profile,design:sanitizeDesign(profile,raw.design),activeSceneId,scenes,customCss:typeof raw.customCss==='string'&&raw.customCss.length<=32000&&!/<|>|@import\b|@font-face\b|@namespace\b|@charset\b|url\s*\(|image-set\s*\(|cross-fade\s*\(|https?:\/\/|data\s*:|src\s*:|\\|expression\s*\(|-moz-binding\b|behavior\s*:|[\u0000-\u0008\u000b\u000e-\u001f]/i.test(raw.customCss)?raw.customCss:''};
 }
 const layer=(kind,label,x,y,w,h,opts={})=>sanitizeLayer({id:newId('layer'),kind,label,x,y,w,h,...opts});
-export function createLayer(kind,profile='nocturne') {
-  const p=PROFILES[profile]||PROFILES.nocturne,cfg={color:p.ink,fill:p.accent};
+export function createLayer(kind,profile='nocturne',design) {
+  const p=sanitizeDesign(profile,design),cfg={color:p.ink,fill:p.accent};
   if(kind==='image')return layer('image','IMAGE',34,25,35,42,{...cfg,src:'',radius:8,alt:'Your image'});
   if(kind==='shape')return layer('shape','SHAPE',40,22,25,36,{...cfg,opacity:75,radius:100,motion:'float',duration:6000});
   if(kind==='link')return layer('link','MOVING LINK',30,75,22,9,{...cfg,content:'Explore ↗',href:'#',fontSize:25,motion:'magnetic'});
   return layer('text','TEXT',20,32,48,20,{...cfg,content:'Type something extraordinary.',fontSize:74});
 }
-export function createScene(profile='nocturne',number=2) {
-  const p=PROFILES[profile]||PROFILES.nocturne;
+export function createScene(profile='nocturne',number=2,design) {
+  const p=sanitizeDesign(profile,design);
   return sanitizeScene({title:`Scene ${number}`,bg:p.bg,transition:'rise',duration:7000,layers:[
     layer('shape','ATMOSPHERE',60,13,28,53,{fill:p.accent,opacity:65,radius:100,motion:'float',duration:6000}),
     layer('text','HEADING',9,30,73,30,{color:p.ink,content:`A NEW WORLD / ${String(number).padStart(2,'0')}`,fontSize:82,motion:'reveal',delay:250,duration:1200}),
