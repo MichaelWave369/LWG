@@ -13,6 +13,16 @@ python3 -m http.server 8080
 
 On GitHub Pages, the same repository root can be deployed with **Settings → Pages → Deploy from a branch → main / root** after merging this PR. The GitHub Pages URL would then be `https://michaelwave369.github.io/LWG/`.
 
+## Rung 4.0: Design DNA foundation
+
+- Six original art-direction presets: After Dark, Soft Matter, Signal / 90, Ember Library, Tidal Glass and Modern Print.
+- Edit four design colors and an offline-safe system font from the **Design DNA** panel, then **Preview** in the isolated Live pane before **Apply**.
+- Apply recolors only backgrounds and layers matching the previous design tokens. Independently customized layer colors are not overwritten.
+- **Undo** restores the previous design state until the next persisted edit.
+- Design tokens are sanitized and stored in existing project JSON v2; v1/v2 imports retain layers and receive defaults when no design object exists.
+- Preview and HTML exports share the canonical color/font tokens; no remote fonts, component libraries or services are needed.
+- A text-to-background WCAG contrast ratio is displayed as an advisory, not a replacement for full accessibility auditing.
+
 ## Rung 3: Dreamweaver-inspired Visual / Code / Live studio
 
 - **Design**: the existing drag-and-drop scene canvas, motion timeline, layer inspector, storyboard and art-direction profiles.
@@ -31,7 +41,7 @@ On GitHub Pages, the same repository root can be deployed with **Settings → Pa
 - Drag shapes, copy, text, and clickable link objects directly across a visual canvas.
 - Add your own images by URL or by upload; image uploads can be embedded in exported HTML.
 - Tune position, size, rotation, opacity, typography, timing and 9 movement behaviors.
-- Switch between three starting visual art directions: **After Dark**, **Soft Matter**, **Signal / 90**.
+- Switch between six starting visual art directions: **After Dark**, **Soft Matter**, **Signal / 90**.
 - Inspect and reorder layers, duplicate/remove objects, preview motion, nudge with arrow keys.
 - Local autosave; import/export editable JSON; download a **standalone HTML/CSS/JS website**.
 - The editor and exported page have **no backend and no CDN dependencies**.

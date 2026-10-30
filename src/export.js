@@ -1,7 +1,8 @@
-import {PROFILES,sanitizeProject,safeUrl} from './project.js';
+import {sanitizeProject,safeUrl} from './project.js';
+import {cssDesign} from './design/tokens.js';
 export const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const css=`
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,sans-serif}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--design-font)}
 .page{width:100%;overflow:clip}.scene-shell{min-height:100svh;display:grid;place-items:center;overflow:clip;background:var(--scene-bg)}
 .scene{position:relative;overflow:hidden;width:100%;aspect-ratio:1440/900;min-height:540px;background:var(--scene-bg);container-type:inline-size}
 .object{position:absolute;display:block;white-space:pre-wrap;overflow-wrap:anywhere;transform:rotate(var(--rot));opacity:var(--alpha);color:var(--color);font-weight:var(--weight);font-size:clamp(9px,calc(var(--fs) * .069444cqw),calc(var(--fs) * 1px));line-height:1.03;letter-spacing:-.035em}
@@ -33,9 +34,9 @@ export function layerHtml(l){
 }
 const script=`(()=>{const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;if(reduced)return;const shells=[...document.querySelectorAll('.scene-shell')];for(const shell of shells){shell.classList.add('js-active');shell.querySelector('.scene').classList.add('js-active')}if(!('IntersectionObserver'in window)){for(const shell of shells){shell.classList.add('in-view');shell.querySelector('.scene').classList.add('in-view')}return}const observer=new IntersectionObserver(entries=>{for(const entry of entries){if(entry.isIntersecting){entry.target.classList.add('in-view');entry.target.querySelector('.scene').classList.add('in-view');observer.unobserve(entry.target)}}},{threshold:.12});shells.forEach(s=>observer.observe(s));document.querySelectorAll('[data-motion=magnetic]').forEach(el=>{el.addEventListener('pointermove',e=>{if(e.pointerType==='touch')return;const r=el.getBoundingClientRect();el.style.transform='translate('+((e.clientX-r.left-r.width/2)*.16)+'px,'+((e.clientY-r.top-r.height/2)*.16)+'px) rotate(var(--rot))'});el.addEventListener('pointerleave',()=>{el.style.transform=''})})})();`;
 export function exportHtml(raw){
-  const project=sanitizeProject(raw),p=PROFILES[project.profile];
+  const project=sanitizeProject(raw),p=project.design;
   const scenes=project.scenes.map((scene,i)=>`<section class="scene-shell" id="${scene.id}" data-transition="${scene.transition}" style="--scene-bg:${scene.bg}" aria-label="${esc(scene.title)}"><div class="scene">${scene.layers.map(layerHtml).join('\n')}</div></section>`).join('\n');
   const nav=project.scenes.length>1?`<nav class="scene-nav" aria-label="Scene navigation">${project.scenes.map((s,i)=>`<a href="#${s.id}" aria-label="Go to ${esc(s.title)}" title="${esc(s.title)}">${i+1}</a>`).join('')}</nav>`:'';
-  return `<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="${p.bg}"><title>${esc(project.title)}</title>\n<style>:root{--bg:${p.bg};--ink:${p.ink};--accent:${p.accent}}${css}
+  return `<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="${p.bg}"><title>${esc(project.title)}</title>\n<style>:root{${cssDesign(p)}}${css}
 ${project.customCss}</style></head>\n<body><main class="page">${scenes}</main>${nav}\n<script>${script}</script></body></html>`;
 }

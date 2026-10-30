@@ -2,6 +2,7 @@ import {PROFILES,MOTIONS,TRANSITIONS,MAX_SCENES,MAX_LAYERS,createProject,createS
 import {esc,exportHtml,layerStyle} from './export.js';
 import {sampleLayer,formatTime,trackRect} from './timeline.js';
 import {readSource,parseProjectJson,validateCustomCss} from './source.js';
+import {FONT_STACKS,applyDesign,sanitizeDesign,contrastRatio} from './design/tokens.js';
 
 const $=id=>document.getElementById(id);
 const STORAGE='lwg-project-v2',LEGACY='lwg-project-v1';
@@ -11,11 +12,12 @@ catch{project=createProject();}
 let selectedId=currentScene(project).layers.at(-1)?.id||null;
 let isPreview=false,modified=false,toastTimer,playhead=0,playing=false,lastFrame=0,rafId=0;
 let workspaceMode='design',sourceKind='css',sourceDirty=false;
+let designDraft={...project.design},designDirty=false,designUndo=null;
 const scene=()=>currentScene(project);
 const selected=()=>scene().layers.find(l=>l.id===selectedId);
 const glyph={text:'T',image:'▧',shape:'◯',link:'↗'};
 function toast(message){const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3200);}
-function persist(){modified=true;try{localStorage.setItem(STORAGE,JSON.stringify(project));}catch{toast('Browser storage full. Save project JSON to preserve your work.');}}
+function persist(preserveDesignUndo=false){if(!preserveDesignUndo)designUndo=null;modified=true;try{localStorage.setItem(STORAGE,JSON.stringify(project));}catch{toast('Browser storage full. Save project JSON to preserve your work.');}}
 function stopPlay(){playing=false;cancelAnimationFrame(rafId);rafId=0;lastFrame=0;updatePlayButton();}
 function updatePlayButton(){
  $('timeline-play').textContent=playing?'Ⅱ Pause':'▶ Play scenes';$('timeline-play').setAttribute('aria-pressed',String(playing));
@@ -29,7 +31,7 @@ function applyTime(){
  }
 }
 function renderArtboard(){
- const stage=$('artboard'),s=scene();stage.classList.add('scene');stage.style.background=s.bg;stage.replaceChildren();stage.classList.toggle('preview-mode',isPreview);
+ const stage=$('artboard'),s=scene();stage.classList.add('scene');stage.style.background=s.bg;stage.style.fontFamily=FONT_STACKS[project.design.font];stage.replaceChildren();stage.classList.toggle('preview-mode',isPreview);
  for(const l of s.layers){
   const node=document.createElement(l.kind==='link'?'a':'div');
   node.className='object '+l.kind+(l.id===selectedId&&!isPreview?' selected':'');
@@ -114,8 +116,36 @@ function renderTimeline(){
  }
  applyTime();
 }
+function renderDesign(){
+ const picker=$('profile-picker');picker.replaceChildren();
+ for(const [id,p] of Object.entries(PROFILES)){
+  const btn=document.createElement('button');btn.type='button';btn.dataset.profile=id;
+  btn.className='profile-btn'+(id===project.profile?' selected':'');btn.setAttribute('aria-pressed',String(id===project.profile));
+  const swatch=document.createElement('span');swatch.className='mini-swatch';
+  swatch.style.background='linear-gradient(135deg,'+p.bg+' 0%,'+p.bg+' 45%,'+p.accent+' 46%,'+p.accent+' 71%,'+p.secondary+' 72%)';
+  const caption=document.createElement('span');caption.textContent=p.name;
+  const detail=document.createElement('small');detail.textContent=p.description;caption.append(detail);
+  btn.append(swatch,caption);picker.append(btn);
+ }
+ const current=designDirty?sanitizeDesign(project.profile,designDraft):project.design;
+ for(const input of document.querySelectorAll('[data-design]')){
+  if(input.dataset.design!=='font')input.value=current[input.dataset.design];
+ }
+ const select=$('design-font');select.replaceChildren();
+ for(const font of Object.keys(FONT_STACKS)){
+  const option=document.createElement('option');option.value=font;option.textContent=font;
+  option.selected=current.font===font;select.append(option);
+ }
+ const contrast=contrastRatio(current.ink,current.bg);
+ $('design-contrast').textContent='Text / background: '+contrast.toFixed(2)+':1 '+(contrast>=4.5?'· AA normal text':'· below AA normal text');
+ $('design-contrast').classList.toggle('dna-warning',contrast<4.5);
+ $('design-apply').disabled=!designDirty;
+ $('design-preview').disabled=!designDirty;
+ $('design-undo').disabled=!designUndo;
+}
 function render(){
  $('project-title').value=project.title;
+ renderDesign();
  document.querySelectorAll('[data-profile]').forEach(b=>{const active=b.dataset.profile===project.profile;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});
  $('preview-toggle').setAttribute('aria-pressed',String(isPreview));$('preview-toggle').textContent=isPreview?'■ Stop timeline preview':'▶ Timeline preview';
  renderScenes();renderArtboard();renderLayers();renderInspector();renderTimeline();updatePlayButton();renderSiteFiles();refreshStudio();
@@ -128,20 +158,45 @@ function tick(now){if(!playing)return;const elapsed=lastFrame?Math.min(100,now-l
  if(playhead>=scene().duration){const i=project.scenes.findIndex(s=>s.id===project.activeSceneId);if(i<project.scenes.length-1){project.activeSceneId=project.scenes[i+1].id;selectedId=scene().layers.at(-1)?.id||null;playhead=0;persist();render();}else{playhead=scene().duration;stopPlay();}}
  applyTime();if(playing)rafId=requestAnimationFrame(tick);
 }
+$('design-font').addEventListener('change',e=>{
+ designDraft={...designDraft,font:e.target.value};designDirty=true;renderDesign();
+});
+document.querySelector('.dna-colors').addEventListener('change',e=>{
+ const key=e.target.dataset.design;if(!key)return;
+ designDraft={...designDraft,[key]:e.target.value};designDirty=true;renderDesign();
+});
+$('design-preview').addEventListener('click',()=>{
+ if(!designDirty)return;
+ const candidate=applyDesign(project,designDraft);
+ enterMode('live');
+ $('live-frame').srcdoc=exportHtml(candidate);
+ toast('Preview only. Your saved project has not changed.');
+});
+$('design-apply').addEventListener('click',()=>{
+ if(!designDirty)return;
+ designUndo=structuredClone(project);
+ project=applyDesign(project,designDraft);designDraft={...project.design};designDirty=false;
+ persist(true);render();toast('Design DNA applied. Undo is available until your next edit.');
+});
+$('design-undo').addEventListener('click',()=>{
+ if(!designUndo)return;
+ project=designUndo;designUndo=null;designDraft={...project.design};designDirty=false;
+ persist();render();toast('Previous palette restored.');
+});
 $('project-title').addEventListener('input',e=>{project.title=e.target.value.slice(0,100);persist();});
 $('profile-picker').addEventListener('click',e=>{const b=e.target.closest('[data-profile]');if(!b||b.dataset.profile===project.profile)return;
  if(modified&&!confirm('Replace all scenes with this style example? Save project JSON first to keep your work.'))return;
- stopPlay();project=createProject(b.dataset.profile);selectedId=scene().layers.at(-1)?.id;isPreview=false;playhead=0;persist();modified=false;render();toast('Loaded a new art direction.');
+ stopPlay();project=createProject(b.dataset.profile);designDraft={...project.design};designDirty=false;selectedId=scene().layers.at(-1)?.id;isPreview=false;playhead=0;persist();modified=false;render();toast('Loaded a new art direction.');
 });
 for(const b of document.querySelectorAll('[data-add]'))b.addEventListener('click',()=>{if(scene().layers.length>=MAX_LAYERS){toast(`Maximum ${MAX_LAYERS} layers in a scene.`);return;}
- const l=createLayer(b.dataset.add,project.profile);scene().layers.push(l);selectedId=l.id;persist();render();toast(`${l.kind.toUpperCase()} object added.`);
+ const l=createLayer(b.dataset.add,project.profile,project.design);scene().layers.push(l);selectedId=l.id;persist();render();toast(`${l.kind.toUpperCase()} object added.`);
 });
 $('scene-list').addEventListener('click',e=>{
  const move=e.target.closest('[data-scene-move]');if(move){const i=project.scenes.findIndex(s=>s.id===move.dataset.sceneId),j=i+Number(move.dataset.sceneMove);if(i<0||j<0||j>=project.scenes.length)return;
  [project.scenes[i],project.scenes[j]]=[project.scenes[j],project.scenes[i]];persist();render();return;}
  const button=e.target.closest('[data-scene]');if(button)setScene(button.dataset.scene);
 });
-$('scene-add').addEventListener('click',()=>{if(project.scenes.length>=MAX_SCENES)return;const s=createScene(project.profile,project.scenes.length+1);project.scenes.push(s);project.activeSceneId=s.id;selectedId=s.layers.at(-1)?.id;stopPlay();playhead=0;persist();render();toast('Scene created. Compose a new world.');});
+$('scene-add').addEventListener('click',()=>{if(project.scenes.length>=MAX_SCENES)return;const s=createScene(project.profile,project.scenes.length+1,project.design);project.scenes.push(s);project.activeSceneId=s.id;selectedId=s.layers.at(-1)?.id;stopPlay();playhead=0;persist();render();toast('Scene created. Compose a new world.');});
 $('scene-duplicate').addEventListener('click',()=>{if(project.scenes.length>=MAX_SCENES)return;const s=duplicateScene(scene()),i=project.scenes.findIndex(item=>item.id===project.activeSceneId);project.scenes.splice(i+1,0,s);project.activeSceneId=s.id;selectedId=s.layers.at(-1)?.id;stopPlay();playhead=0;persist();render();toast('Scene duplicated.');});
 $('scene-delete').addEventListener('click',()=>{if(project.scenes.length<=1)return;if(!confirm(`Delete ${scene().title} and its layers?`))return;const i=project.scenes.findIndex(s=>s.id===project.activeSceneId);project.scenes.splice(i,1);project.activeSceneId=project.scenes[Math.max(0,i-1)].id;selectedId=scene().layers.at(-1)?.id||null;stopPlay();playhead=0;persist();render();});
 $('scene-name').addEventListener('change',e=>changeSceneProp('title',e.target.value));
@@ -158,7 +213,7 @@ $('timeline-scrub').addEventListener('input',e=>{if(playing)stopPlay();playhead=
 $('timeline-tracks').addEventListener('click',e=>{const row=e.target.closest('[data-track]');if(!row)return;const rail=e.target.closest('.timeline-rail');select(row.dataset.track);
  if(rail){if(playing)stopPlay();const rect=rail.getBoundingClientRect();playhead=Math.min(scene().duration,Math.max(0,(e.clientX-rect.left)/rect.width*scene().duration));isPreview=true;renderArtboard();applyTime();}
 });
-$('reset-template').addEventListener('click',()=>{if(modified&&!confirm('Replace ALL scenes with the original example?'))return;stopPlay();project=createProject(project.profile);selectedId=scene().layers.at(-1)?.id;playhead=0;isPreview=false;persist();modified=false;render();});
+$('reset-template').addEventListener('click',()=>{if(modified&&!confirm('Replace ALL scenes with the original example?'))return;stopPlay();project=createProject(project.profile);designDraft={...project.design};designDirty=false;selectedId=scene().layers.at(-1)?.id;playhead=0;isPreview=false;persist();modified=false;render();});
 $('layer-list').addEventListener('click',e=>{const order=e.target.closest('button[data-order]');if(order){const layers=scene().layers,index=layers.findIndex(l=>l.id===order.dataset.layer),target=index+(order.dataset.order==='up'?1:-1);
  if(index<0||target<0||target>=layers.length)return;[layers[index],layers[target]]=[layers[target],layers[index]];selectedId=order.dataset.layer;persist();render();return;}
  const item=e.target.closest('[data-select]');if(item)select(item.dataset.select);
@@ -199,7 +254,7 @@ $('export-html').addEventListener('click',()=>{download(exportHtml(project),'lwg
 $('save-json').addEventListener('click',()=>{download(JSON.stringify(project,null,2),'lwg-project-v2.json','application/json');toast('Editable project saved.');});
 $('import-json').addEventListener('click',()=>$('json-input').click());
 $('json-input').addEventListener('change',async e=>{const file=e.target.files?.[0];e.target.value='';if(!file)return;if(file.size>4_000_000){toast('Project file exceeds the 4 MB import limit.');return;}
- try{const data=JSON.parse(await file.text());project=parseProjectJson(JSON.stringify(data));stopPlay();selectedId=scene().layers.at(-1)?.id||null;isPreview=false;playhead=0;persist();modified=false;render();toast('Project imported. Legacy v1 files are migrated automatically.');}
+ try{const data=JSON.parse(await file.text());project=parseProjectJson(JSON.stringify(data));stopPlay();designDraft={...project.design};designDirty=false;selectedId=scene().layers.at(-1)?.id||null;isPreview=false;playhead=0;persist();modified=false;render();toast('Project imported. Legacy v1 files are migrated automatically.');}
  catch(err){toast(`Import failed: ${err.message}`);}
 });
 /* Rung 3: Design / Split / Code / Live. Canonical JSON is truly bidirectional; generated HTML is read-only. */
@@ -256,7 +311,7 @@ function applySourceDraft(){
  try{
   if(sourceKind==='css')project.customCss=validateCustomCss($('source-editor').value);
   else if(sourceKind==='json'){
-   const next=parseProjectJson($('source-editor').value);stopPlay();project=next;
+   const next=parseProjectJson($('source-editor').value);stopPlay();project=next;designDraft={...project.design};designDirty=false;
    selectedId=scene().layers.at(-1)?.id||null;isPreview=false;playhead=0;
   }
   sourceDirty=false;persist();render();toast('Source applied. Canvas and export are in sync.');

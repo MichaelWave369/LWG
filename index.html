@@ -26,12 +26,25 @@
       <p class="intro">Compose a living world scene by scene. Every object gets a place and a timeline, not another three-card prompt.</p>
       <label class="field-label" for="project-title">PAGE TITLE</label>
       <input id="project-title" class="dark-input" type="text" maxlength="100" />
-      <div class="section-title"><span>Art direction</span><span>01—03</span></div>
-      <div class="profile-picker" id="profile-picker" role="group" aria-label="Visual styles">
-        <button class="profile-btn selected" data-profile="nocturne" type="button"><span class="mini-swatch nocturne"></span><span>After Dark<small>cinematic / celestial</small></span></button>
-        <button class="profile-btn" data-profile="solstice" type="button"><span class="mini-swatch solstice"></span><span>Soft Matter<small>editorial / organic</small></span></button>
-        <button class="profile-btn" data-profile="signal" type="button"><span class="mini-swatch signal"></span><span>Signal / 90<small>retro / electronic</small></span></button>
-      </div>
+      <div class="section-title"><span>Art direction</span><span>DESIGN DNA</span></div>
+      <div class="profile-picker" id="profile-picker" role="group" aria-label="Art direction examples"></div>
+      <section class="design-dna" aria-label="Design DNA editor">
+        <div class="dna-header"><strong>Design DNA</strong><small>Palette + type · local</small></div>
+        <p class="dna-help">Adjust the project palette without replacing your scenes. Preview first, then apply. Hand-customized layer colors remain yours.</p>
+        <div class="dna-colors">
+          <label>Background <input data-design="bg" type="color" aria-label="Background color"></label>
+          <label>Text <input data-design="ink" type="color" aria-label="Main text color"></label>
+          <label>Accent <input data-design="accent" type="color" aria-label="Accent color"></label>
+          <label>Secondary <input data-design="secondary" type="color" aria-label="Secondary color"></label>
+        </div>
+        <label class="dna-type">Typography <select id="design-font" data-design="font" aria-label="Font family"></select></label>
+        <output id="design-contrast" class="dna-contrast" aria-live="polite"></output>
+        <div class="dna-actions">
+          <button id="design-preview" type="button">Preview</button>
+          <button id="design-apply" type="button" class="dna-primary">Apply</button>
+          <button id="design-undo" type="button">Undo</button>
+        </div>
+      </section>
       <div class="section-title"><span>Add to the scene</span><span>+ OBJECT</span></div>
       <div class="tool-grid">
         <button class="tool-btn" data-add="text" type="button"><span aria-hidden="true">T</span>Text</button>
