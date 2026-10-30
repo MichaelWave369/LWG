@@ -11,7 +11,7 @@
 <body>
   <header class="topbar">
     <a class="brand" href="./" aria-label="LWG home"><span class="brand-orb">◉</span><span>LWG<span class="brand-caption">THE LIVING WEB</span></span></a>
-    <div class="center-label"><span class="status-dot"></span> VISUAL COMPOSITION ENGINE <span class="version">/ 0.1.0</span></div>
+    <div class="center-label"><span class="status-dot"></span> VISUAL COMPOSITION ENGINE <span class="version">/ 0.2.0</span></div>
     <div class="top-actions">
       <button class="utility" id="import-json" type="button" title="Import a project JSON">Import</button>
       <button class="utility" id="save-json" type="button" title="Download editable project JSON">Save project</button>
@@ -22,7 +22,7 @@
     <aside class="left-panel" aria-label="Editor tools">
       <div class="panel-kicker">01 / YOUR STUDIO</div>
       <h1>Break the <em>template.</em></h1>
-      <p class="intro">Build websites as layered, responsive scenes. Design with your hands, not another three-card prompt.</p>
+      <p class="intro">Compose a living world scene by scene. Every object gets a place and a timeline, not another three-card prompt.</p>
       <label class="field-label" for="project-title">PAGE TITLE</label>
       <input id="project-title" class="dark-input" type="text" maxlength="100" />
       <div class="section-title"><span>Art direction</span><span>01—03</span></div>
@@ -43,11 +43,22 @@
     <main class="editor">
       <div class="editor-head"><div><span class="eyebrow">LIVE CANVAS / 1440 × 900</span><h2>Make it feel alive<span class="punctuation">.</span></h2></div><div class="preview-actions"><button class="small-btn" id="reset-template" type="button" title="Reset current style to its example composition">Reset scene</button><button class="small-btn" id="preview-toggle" type="button" aria-pressed="false">▶ Preview motion</button></div></div>
       <div class="canvas-container">
+        <section class="scene-studio" aria-label="Scene storyboard">
+          <div class="scene-head"><div><span class="eyebrow">STORYBOARD / SCENE WORLDS</span><strong id="scene-count">1 / 12 SCENES</strong></div><div class="scene-actions"><button id="scene-add" type="button">+ New scene</button><button id="scene-duplicate" type="button">⧉ Duplicate</button><button id="scene-delete" type="button" title="Delete the current scene">Delete</button></div></div>
+          <div id="scene-list" class="scene-list" aria-label="Scene order"></div>
+          <div class="scene-settings"><label>SCENE NAME<input id="scene-name" type="text" maxlength="80"></label><label>BACKGROUND<input id="scene-bg" type="color"></label><label>LENGTH / SECONDS<input id="scene-duration" type="number" min="2" max="30" step="0.5"></label><label>ENTRANCE<select id="scene-transition"><option value="none">None</option><option value="fade">Fade</option><option value="rise">Rise</option><option value="zoom">Zoom</option></select></label></div>
+        </section>
         <div class="canvas-top"><span>ARTBOARD / DESKTOP</span><span class="canvas-hint">DRAG TO MOVE · ARROW KEYS TO NUDGE</span><span>100% / RESPONSIVE</span></div>
         <div class="artboard-frame"><div id="artboard" class="artboard" tabindex="0" role="group" aria-label="Editable page canvas"></div></div>
         <div class="canvas-bottom"><span><span class="status-dot"></span> LIVE RENDER</span><span>CLICK OBJECTS TO EDIT · SHIFT + ARROW FOR LARGER NUDGE</span><span id="object-count">0 OBJECTS</span></div>
       </div>
-      <div class="editor-under"><div><span class="eyebrow">HOW IT WORKS</span><p>Every object can move, reveal, float, or respond to the cursor. Click <strong>Export website</strong> for one standalone HTML file.</p></div><button class="text-link" id="preview-page" type="button">Open real page preview ↗</button></div>
+      <section class="timeline-studio" aria-label="Motion timeline">
+        <div class="timeline-head"><div><span class="eyebrow">MOTION TIMELINE / DETERMINISTIC</span><p>Scrub the playhead or click a track to jump to that moment. Play automatically moves through your scenes.</p></div><button id="timeline-play" type="button" class="small-btn" aria-pressed="false">▶ Play scenes</button></div>
+        <div class="timeline-scrub-row"><input id="timeline-scrub" type="range" min="0" max="8000" step="25" value="0" aria-label="Timeline position"><output id="timeline-time">0.0s / 8.0s</output></div>
+        <div class="timeline-ruler"><span>START</span><span>25%</span><span>50%</span><span>75%</span><span>END</span></div>
+        <div class="timeline-viewport" id="timeline-viewport"><div id="timeline-tracks" class="timeline-tracks"></div><div id="timeline-playhead" class="timeline-playhead" aria-hidden="true"></div></div>
+      </section>
+      <div class="editor-under"><div><span class="eyebrow">HOW IT WORKS</span><p>Each scene has its own layers, background, timing and entrance. <strong>Export website</strong> creates one portable multi-scene HTML file.</p></div><button class="text-link" id="preview-page" type="button">Open real page preview ↗</button></div>
     </main>
     <aside class="right-panel" aria-label="Layers and selected object properties">
       <div class="panel-kicker">02 / COMPOSITION</div>
